@@ -24,7 +24,7 @@ def image_log(func: callable):
             time_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")
             file_name = f"{func.__name__}_{time_str}.png"
 
-            logger.debug(f"[{func.__name__}] 保存图片: {file_name}")
+            logger.debug(f"[{func.__name__}] savepicture: {file_name}")
             image.save(f"./debug/{file_name}")
         return image
 
@@ -39,7 +39,7 @@ def timer_log(func: callable):
         start_time = time.monotonic()
         result = func(*args, **kwargs)
 
-        logger.debug(f"[{func.__name__}] 耗时: {time.monotonic() - start_time:.3f}s")
+        logger.debug(f"[{func.__name__}] usetime: {time.monotonic() - start_time:.3f}s")
 
         return result
 
@@ -53,7 +53,7 @@ def result_log(func: callable):
     @wraps(func)
     def inner(*args, **kwargs):
         result = func(*args, **kwargs)
-        logger.debug(f"[{func.__name__}] 结果: {result:.3f}")
+        logger.debug(f"[{func.__name__}] result: {result:.3f}")
         return result
 
     return inner
