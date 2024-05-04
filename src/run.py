@@ -32,10 +32,10 @@ def run():
     continuous_fail_count = 0
     need_refresh_checkpoint = False
 
-    logger.info("程序启动")
+    logger.info("program start")
 
     if base_settings.debug:
-        logger.info("已开启调试模式")
+        logger.info("open debug")
         Path("./debug").mkdir(exist_ok=True)
 
     time.sleep(2)
@@ -44,12 +44,12 @@ def run():
         while True:
             x_similarity = get_x_similarity()
             if x_similarity > 0.9:
-                logger.info("检测到X技能准备就绪")
+                logger.info("x is already")
                 break
             time.sleep(X_SIMILARITY_CHECK_INTERVAL)
 
         if continuous_fail_count >= 30:
-            logger.info("连续失败次数超过30次，重新进本")
+            logger.info("Failed more than 30 times,reenter")
             start_next_round()
             need_refresh_checkpoint = True
             continuous_fail_count = 0
@@ -72,7 +72,7 @@ def run():
 
         if not hp_bar_mask_ratio >= 0.8:
             continuous_fail_count += 1
-            logger.info("未在玩家血条上检测到感应护盾，准备团灭重试")
+            logger.info("Sensor shield not detected on player health bar，retry")
 
             press(base_settings.职业技能按键)
             time.sleep(1.5)
@@ -82,18 +82,18 @@ def run():
             continue
 
         finish_count += 1
-        logger.info("玩家血条蓝盾检测成功")
+        logger.info("Detection successful")
 
         start_time = time.monotonic()
 
-        # 躲起来等待boss血条消失
+        # wait boss die
         time.sleep(2)
         hide_indebted_kindess()
 
         while True:
             if time.monotonic() - start_time >= 25:
                 continuous_fail_count += 1
-                logger.info("等待boss血条消失超时，准备团灭重试")
+                logger.info("Timeout waiting for boss health bar to disappear，Retry")
 
                 press(base_settings.未充能近战按键)
                 time.sleep(10)
@@ -102,26 +102,26 @@ def run():
 
             boss_hp_bar_mask_ratio = get_boss_hp_bar_mask_ratio()
 
-            # 如果boss血条消失，进行玩家血条的检测
+            # If the boss's health bar disappears, check the player's health bar.
             if boss_hp_bar_mask_ratio <= 0.1:
                 logger.info("boss血条已消失")
 
                 normal_hp_bar_mask_ratio = get_normal_hp_bar_mask_ratio()
 
-                # 如果再检测到玩家血条，说明正常结算
+                # If the player's health bar is detected again, it means success.
                 if normal_hp_bar_mask_ratio >= 0.8:
                     success_count += 1
                     continuous_fail_count = 0
                     need_refresh_checkpoint = True
-                    logger.success("已检测到玩家的血条，本轮结算成功")
+                    logger.success("The player's health bar has been detected，successful")
 
                     time.sleep(2)
                     start_next_round()
 
                     break
-                # 如果没有检测到玩家血条，说明灭了
+                # If the player's health bar is not detected, it means failure.
                 else:
-                    logger.info("未检测到玩家的血条，本轮团灭")
+                    logger.info("Player's health bar not detected，Retry")
                     continuous_fail_count += 1
                     break
 
